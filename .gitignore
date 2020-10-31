@@ -265,3 +265,5 @@ __pycache__/
 
 # Custom
 *.zip
+google_transit/
+SampleData/
