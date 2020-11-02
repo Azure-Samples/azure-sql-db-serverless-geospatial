@@ -13,10 +13,10 @@ storageName="dmctb"
 location="WestUS2" 
 
 # Change this if you are using your own github repository
-gitSource="https://github.com/azure-Samples/azure-sql-db-serverless-geospatial"
+gitSource="https://github.com/Azure-Samples/azure-sql-db-serverless-geospatial"
 
 # Check that local.settings.json exists
-settingsFile="./function/local.settings.json"
+settingsFile="./local.settings.json"
 if ! [ -f $settingsFile ]; then
     echo "$settingsFile does not exists. Please create it."
     exit

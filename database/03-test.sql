@@ -5,8 +5,8 @@ declare @payload nvarchar(max) = N'[{
 	"RouteId": 1,
 	"VehicleId": 1,
 	"Position": {
-		"Latitude": 47.617005097778616,
-		"Longitude": -122.14203287537352
+		"Latitude": 45.617005097778616,
+		"Longitude": -121.14203287537352
 	},
 	"TimestampUTC": "20201030"
 },{

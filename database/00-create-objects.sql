@@ -9,6 +9,9 @@ create table dbo.BusData
 	[TimestampUTC] [datetime2](7) null
 )
 go
+alter table dbo.[BusData]
+add ReceivedAtUTC datetime2 default (sysutcdatetime())
+go
 
 drop table if exists dbo.GeoFences;
 create table [dbo].[GeoFences]
