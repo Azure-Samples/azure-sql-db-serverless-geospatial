@@ -33,7 +33,7 @@ namespace CatchTheBus
 
         private readonly string _connectionString = Environment.GetEnvironmentVariable("AzureSQLConnectionString");
         private readonly string _busRealTimeFeedUrl = Environment.GetEnvironmentVariable("RealTimeFeedUrl");
-        private readonly string _IFTTTUrl = Environment.GetEnvironmentVariable("IFTTUrl");
+        private readonly string _IFTTTUrl = Environment.GetEnvironmentVariable("IFTTTUrl");
 
         private readonly ILogger _log;
         private readonly HttpClient _client = new HttpClient();
