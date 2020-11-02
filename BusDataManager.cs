@@ -18,9 +18,25 @@ namespace CatchTheBus
 {
     public class BusDataManager
     {
+        public class ActivatedGeoFence
+        {
+            public int BusDataId { get; set; }
+            public int VehicleId { get; set; }
+            public int DirectionId { get; set; }
+            public int RouteId { get; set; }
+            public string RouteName { get; set; }
+            public int GeoFenceId { get; set; }
+    		public string GeoFenceName { get; set; }          
+		    public string GeoFenceStatus { get; set; }
+            public DateTime TimestampUTC { get; set; }
+        }
+
         private readonly string _connectionString = Environment.GetEnvironmentVariable("AzureSQLConnectionString");
-        private readonly string _busRealTimeFeedUrl = Environment.GetEnvironmentVariable("RealTimeFeedUrl"); 
+        private readonly string _busRealTimeFeedUrl = Environment.GetEnvironmentVariable("RealTimeFeedUrl");
+        private readonly string _IFTTTUrl = Environment.GetEnvironmentVariable("IFTTUrl");
+
         private readonly ILogger _log;
+        private readonly HttpClient _client = new HttpClient();
 
         public BusDataManager(ILogger log)
         {
@@ -40,13 +56,14 @@ namespace CatchTheBus
             // Find all the bus to be monitored
             var buses = feed.Entities.FindAll(e => monitoredRoutes.Contains(e.Vehicle.Trip.RouteId));
 
-            await SaveBusData(buses);
+            _log.LogInformation($"Found {buses.Count} in monitored routes");
+
+            await ProcessGeoFences(buses);
         }
 
         private async Task<GTFS.RealTime.Feed> DownloadBusData()
         {
-            var client = new HttpClient();
-            var response = await client.GetAsync(_busRealTimeFeedUrl);
+            var response = await _client.GetAsync(_busRealTimeFeedUrl);
             response.EnsureSuccessStatusCode();
             var responseString = await response.Content.ReadAsStringAsync();
             var feed = JsonConvert.DeserializeObject<GTFS.RealTime.Feed>(responseString);
@@ -61,7 +78,7 @@ namespace CatchTheBus
             return result.ToList();
         }
 
-        private async Task SaveBusData(List<GTFS.RealTime.Entity> buses)
+        private async Task ProcessGeoFences(List<GTFS.RealTime.Entity> buses)
         {
             // Build payload
             var busData = new JArray();
@@ -86,8 +103,29 @@ namespace CatchTheBus
             
             using var conn = new SqlConnection(_connectionString);
             {
-                await conn.ExecuteAsync("web.AddBusData", new { payload = busData.ToString() },  commandType: CommandType.StoredProcedure);
+                var geoFences = await conn.QueryAsync<ActivatedGeoFence>("web.AddBusData", new { payload = busData.ToString() },  commandType: CommandType.StoredProcedure);
+                _log.LogInformation($"Found {geoFences.Count()} activity on GeoFences");
+
+                foreach(var gf in geoFences)
+                {
+                    _log.LogInformation($"Vehicle {gf.VehicleId}, route {gf.RouteName}, {gf.GeoFenceStatus} GeoFence {gf.GeoFenceName} at {gf.TimestampUTC} UTC");
+                    await TriggerIFTTT(gf);
+                }
             }            
         }
+
+        public async Task TriggerIFTTT(ActivatedGeoFence geoFence)
+        {
+            var content = JObject.Parse("{" + $"'value1':'{geoFence.VehicleId}', 'value2': '{geoFence.GeoFenceStatus}'" + "}");
+
+            _log.LogInformation($"Calling IFTTT webhook for {geoFence.VehicleId}");
+            //_log.LogDebug("POST: " + content.ToString());
+            var stringContent = new StringContent(JsonConvert.SerializeObject(content, Formatting.None), Encoding.UTF8, "application/json");
+            var iftttResult = await _client.PostAsync(_IFTTTUrl, stringContent);
+
+            iftttResult.EnsureSuccessStatusCode();
+
+            _log.LogInformation($"[{geoFence.VehicleId}/{geoFence.DirectionId}/{geoFence.GeoFenceId}] WebHook called successfully");
+        }    
     }
 }
