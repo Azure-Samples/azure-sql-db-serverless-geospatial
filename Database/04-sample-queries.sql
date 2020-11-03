@@ -1,3 +1,18 @@
+-- Cleanup sample data
+delete from dbo.[BusData] where [VehicleId] in (1,2)
+delete from dbo.[GeoFenceLog] where [VehicleId] in (1,2)
+delete from dbo.[GeoFencesActive] where [VehicleId] in (1,2)
+go
+
+-- View gathered data
+select top (100) *, cast([TimestampUTC] as datetimeoffset) at time zone 'Pacific Standard Time' from dbo.[BusData] order by id desc
+select top (100) *, cast([TimestampUTC] as datetimeoffset) at time zone 'Pacific Standard Time' from dbo.[GeoFenceLog] order by id desc
+select * from dbo.[GeoFencesActive]
+select * from dbo.[GeoFencesActiveHistory] order by id desc
+go
+
+
+
 /*
     Return the last 50 points of a specific Vehicle
 */
