@@ -5,12 +5,15 @@ create table dbo.BusData
 	DirectionId int not null,
 	RouteId int not null,
 	VehicleId int not null,
-	[Location] [geography] null,
-	[TimestampUTC] [datetime2](7) null
+	[Location] geography not null,
+	TimestampUTC datetime2(7) not null,
+	ReceivedAtUTC datetime2(7) not null default (sysutcdatetime())
 )
 go
-alter table dbo.[BusData]
-add ReceivedAtUTC datetime2 default (sysutcdatetime())
+create spatial index [ixsp] on [dbo].[BusData]
+(
+	[Location]
+) using  geography_auto_grid 
 go
 
 drop table if exists dbo.GeoFences;
@@ -102,7 +105,7 @@ begin
 			[TimestampUTC] datetime2(7)
 		)
 		
-	--
+	-- Get details of inserted data
 	select * into #t from dbo.[BusData] where id  in (select i.id from @ids i);
 
 	-- Find geofences in which the vehicle is in
@@ -118,8 +121,7 @@ begin
 	from 
 		dbo.GeoFences g 
 	right join
-		#t t on g.GeoFence.STContains(t.[Location]) = 1
-;
+		#t t on g.GeoFence.STContains(t.[Location]) = 1;
 
 	-- Calculate status
 	select
@@ -138,7 +140,7 @@ begin
 	from
 		#g c
 	full outer join
-		dbo.GeoFencesActive a on c.DirectionId = a.DirectionId and c.VehicleId = a.VehicleId
+		dbo.GeoFencesActive a on c.DirectionId = a.DirectionId and c.VehicleId = a.VehicleId;
 
 	-- Delete exited geofences
 	delete 
@@ -165,4 +167,28 @@ begin
 		GeoFenceId, BusDataId, [RouteId], [VehicleId], [TimestampUTC], isnull([Status], 'In')
 	from
 		#s s
+	where
+		s.[GeoFenceId] is not null
+
+	-- Return Entered or Exited geofences
+	select
+		s.[BusDataId], 
+		s.[VehicleId],
+		s.[DirectionId],  
+		s.[RouteId], 
+		r.[ShortName] as RouteName,
+		s.[GeoFenceId], 
+		gf.[Name] as GeoFence,
+		s.[Status] as GeoFenceStatus,
+		s.[TimestampUTC]
+	from
+		#s s
+	inner join
+		dbo.[GeoFences] gf on s.[GeoFenceId] = gf.[Id]
+	inner join
+		dbo.[Routes] r on s.[RouteId] = r.[Id]
+	where
+		s.[Status] is not null and s.[GeoFenceId] is not null
 end
+go
+
