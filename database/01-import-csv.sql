@@ -17,7 +17,7 @@ with (
 	credential = TransitCredentials
 )
 
-truncate table dbo.[Routes];
+delete from dbo.[Routes];
 insert into dbo.[Routes]
 	([Id], [AgencyId], [ShortName], [Description], [Type])
 select 

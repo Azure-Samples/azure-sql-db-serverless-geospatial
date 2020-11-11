@@ -11,8 +11,6 @@ select * from dbo.[GeoFencesActive]
 select * from dbo.[GeoFencesActiveHistory] order by id desc
 go
 
-
-
 /*
     Return the last 50 points of a specific Vehicle
 */

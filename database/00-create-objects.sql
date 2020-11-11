@@ -1,14 +1,19 @@
+/*
+	BusData
+*/
 drop table if exists dbo.BusData;
 create table dbo.BusData
 (
-	Id int identity not null primary key,
-	DirectionId int not null,
-	RouteId int not null,
-	VehicleId int not null,
+	[Id] int identity not null primary key clustered,
+	[DirectionId] int not null,
+	[RouteId] int not null,
+	[VehicleId] int not null,
 	[Location] geography not null,
-	TimestampUTC datetime2(7) not null,
-	ReceivedAtUTC datetime2(7) not null default (sysutcdatetime())
+	[TimestampUTC] datetime2(7) not null,
+	[ReceivedAtUTC] datetime2(7) not null default (sysutcdatetime())
 )
+go
+create nonclustered index ix1 on dbo.BusData (ReceivedAtUTC desc)
 go
 create spatial index [ixsp] on [dbo].[BusData]
 (
@@ -16,6 +21,9 @@ create spatial index [ixsp] on [dbo].[BusData]
 ) using  geography_auto_grid 
 go
 
+/*
+	GeoFences
+*/
 drop table if exists dbo.GeoFences;
 create table [dbo].[GeoFences]
 (
@@ -24,16 +32,19 @@ create table [dbo].[GeoFences]
 	[GeoFence] [geography] not null,
 )
 go
-create spatial index [isp] on [dbo].[GeoFences]
+create spatial index [ixsp] on [dbo].[GeoFences]
 (
 	[GeoFence]
 ) using  geography_auto_grid 
 go
 
+/*
+	GeoFenceLog
+*/
 drop table if exists dbo.GeoFenceLog;
 create table [dbo].[GeoFenceLog]
 (
-	[Id] int identity(1,1) not null primary key nonclustered,	
+	[Id] int identity(1,1) not null primary key clustered,	
 	[GeoFenceId] int not null,
 	[BusDataId] int not null,
 	[RouteId] int not null,
@@ -43,6 +54,9 @@ create table [dbo].[GeoFenceLog]
 )
 go
 
+/*
+	GeoFencesActive
+*/
 if exists(select * from sys.[tables] where [object_id] = object_id('dbo.GeoFencesActive') and [temporal_type] = 2) begin
 	alter table [dbo].[GeoFencesActive] set ( system_versioning = off);
 end
@@ -71,7 +85,48 @@ create table [dbo].[GeoFencesActive]
 with( system_versioning = on ( history_table = [dbo].[GeoFencesActiveHistory] ) )
 go
 
+/*
+	MonitoredRoutes
+*/
+drop table if exists [dbo].[MonitoredRoutes];
+create table [dbo].[MonitoredRoutes]
+(
+	[RouteId] [int] not null primary key clustered,
+) 
+go
 
+/*
+	Routes
+*/
+drop table if exists [dbo].[Routes];
+create table [dbo].[Routes](
+	[Id] [int] not null primary key clustered,
+	[AgencyId] [varchar](100) null,
+	[ShortName] [varchar](100) null,
+	[Description] [varchar](1000) null,
+	[Type] [int] null,
+) 
+go
+alter table [dbo].[MonitoredRoutes] 
+add constraint [FK__MonitoredRoutes__Router] foreign key ([RouteId]) references [dbo].[Routes] ([Id])
+go
+
+/*
+	Add received Bus geolocation data and check if buses are
+	inside any defined GeoFence. JSON must be like:
+
+	{
+		"DirectionId": 1,
+		"RouteId": 100001,
+		"VehicleId": 2,
+		"Position": {
+			"Latitude": 47.61705102765316,
+			"Longitude": -122.14291865504012 
+		},
+		"TimestampUTC": "20201031"
+	}
+}
+*/
 create or alter procedure web.AddBusData
 @payload nvarchar(max) 
 as
