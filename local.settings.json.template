@@ -1,0 +1,10 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "RealTimeFeedUrl": "https://s3.amazonaws.com/kcm-alerts-realtime-prod/vehiclepositions_enhanced.json",
+    "IFTTTUrl": "<your-ifttt-trigger-url>",
+    "AzureSQLConnectionString": "Server=tcp:XYZ.database.windows.net,1433;Database=XYZ;User ID=af-user;Password=Super_Str0ng*P@ZZword!;Encrypt=true;Connection Timeout=30;"
+  }
+}

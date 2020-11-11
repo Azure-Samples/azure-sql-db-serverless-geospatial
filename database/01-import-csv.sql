@@ -1,3 +1,7 @@
+/*
+	Full documentation on "Accessing data in a CSV file referencing an Azure blob storage location" here:
+	https://docs.microsoft.com/en-us/sql/relational-databases/import-export/examples-of-bulk-access-to-data-in-azure-blob-storage?view=sql-server-ver15
+*/
 create master key encryption by password = 'Your_VERY_StrongPazzw0rd!'
 go
 

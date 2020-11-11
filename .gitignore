@@ -265,5 +265,6 @@ __pycache__/
 
 # Custom
 *.zip
-google_transit/
+transit/
 SampleData/
+.vscode/
