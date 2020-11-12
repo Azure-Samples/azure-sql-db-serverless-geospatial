@@ -247,13 +247,67 @@ begin
 end
 go
 
-
 /*
 	Return the Routes (and thus the buses) to monitor
-}
 */
 create or alter procedure [web].[GetMonitoredRoutes]
 as
 begin
 	select RouteId from dbo.[MonitoredRoutes]
 end
+go
+
+/*
+	Return last geospatial data for bus closest to the GeoFence
+*/
+create or alter procedure web.GetMonitoredBusData
+as
+begin
+	with cte as
+	(
+		-- Get all buses traveling TO (DirectionId=1) Education Hill
+		select top (1) with ties 
+			*  
+		from 
+			dbo.[BusData] 
+		where 
+			DirectionId = 1
+		order by 
+			Id desc
+	),
+	cte2 as
+	(
+		-- Get the closest to the GeoFence
+		select top (1)
+			c.[VehicleId],
+			c.[Location].STDistance(gf.[GeoFence]) as d
+		from
+			[cte] c
+		cross join
+			dbo.[GeoFences] gf
+		where
+			gf.[Id] = 1
+		order by
+			d desc
+	), cte3 as
+	(
+	-- Take the last 50 points
+	select top (50)
+		[bd].[VehicleId],
+		bd.[DirectionId],
+		[bd].[Location] as l
+	from
+		dbo.[BusData] bd
+	inner join
+		cte2 on [cte2].[VehicleId] = [bd].[VehicleId]
+	where 
+		bd.DirectionId = 1
+	order by 
+		id desc
+	)
+	select
+		geography::UnionAggregate(l).ToString() as cal
+	from
+		cte3
+end
+

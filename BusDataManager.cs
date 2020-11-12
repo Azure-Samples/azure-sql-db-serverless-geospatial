@@ -125,5 +125,19 @@ namespace CatchTheBus
 
             _log.LogInformation($"[{geoFence.VehicleId}/{geoFence.DirectionId}/{geoFence.GeoFenceId}] WebHook called successfully");
         }    
+
+        public async Task<JObject> GetMonitoredBusData()
+        {
+            using(var conn = new SqlConnection(_connectionString))
+            {
+                var result = await conn.QuerySingleOrDefaultAsync<string>("web.GetMonitoredBusData", commandType: CommandType.StoredProcedure);
+                
+                var busData = new {
+                    geometry = result ?? string.Empty
+                };
+
+                return JObject.FromObject(busData);
+            }
+        }
     }
 }

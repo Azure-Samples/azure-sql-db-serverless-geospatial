@@ -29,6 +29,7 @@
         var fill = new ol.style.Fill({
             color: 'rgba(210, 122, 167,0.2)'
         });
+
         var stroke = new ol.style.Stroke({
             color: '#B40404',
             width: 2
@@ -45,20 +46,12 @@
                 stroke: stroke
             })
         ];
-
-        /**
-        * Let user change the geometry type.
-        * @param {Event} e Change event.
-        */
-        function createVector() {
+      
+        function init() {
             vector = new ol.layer.Vector({
                 source: new ol.source.Vector({ features: features }),
                 style: styles
             });
-        }        
-
-        function init() {
-            createVector();
 
             raster = new ol.layer.Tile({
                 source: new ol.source.OSM()
@@ -81,29 +74,26 @@
             );                        
         }
 
-        // Plot wkt string on map
         function plotWKT(wkt_string) {
             var new_feature;
 
-            if (wkt_string == "") {
+            if (wkt_string == "") 
                 return;
-            } else {
-                try {
-                    new_feature = format.readFeature(wkt_string);
-                } catch (err) {
-                }
-            }
+            
+            try {
+                new_feature = format.readFeature(wkt_string);
+            } catch (err) {}            
 
             //console.log(new_feature);
 
-            if (!new_feature) {
+            if (!new_feature) 
                 return;
-            } else {
-                map.removeLayer(vector);
-                features.clear();
-                new_feature.getGeometry().transform('EPSG:4326', 'EPSG:3857');
-                features.push(new_feature);
-            }
+            
+            map.removeLayer(vector);
+            features.clear();
+            new_feature.getGeometry().transform('EPSG:4326', 'EPSG:3857');
+            features.push(new_feature);
+
             vector = new ol.layer.Vector({
                 source: new ol.source.Vector({ features: features }),
                 style: styles
@@ -123,18 +113,7 @@
                 zoom: 8
             }));
             map.getView().fit(extent, map.getSize());
-        }
-
-        function clearMap() {
-            map.removeLayer(vector);
-            features.clear();
-            vector = new ol.layer.Vector({
-                source: new ol.source.Vector({ features: features }),
-                style: styles
-            });
-            selectGeom(current_shape);
-            map.addLayer(vector);            
-        }
+        }        
     </script>
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
