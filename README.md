@@ -34,12 +34,16 @@ The sample uses an Azure Function to monitor Real-Time Public Transportation Dat
 
 Every 15 seconds the Azure Function will wake up and get the GTS Realtime Feed. It will send data to Azure SQL where, thanks to [Geospatial](https://docs.microsoft.com/en-us/sql/relational-databases/spatial/spatial-data-sql-server) support, data will be stored and processed to see if any of the monitored buses (in table `dbo.MonitoredRoutes`) is a Geofence (stored in `dbo.GeoFences` table). If yes, the function will call an IFTTT endpoint to send a notification to a mobile phone. Better leave the office to be sure not to miss the bus!
 
-
 ## Pre-Requisites
 
-To run this sample, you need to have [Azure Function Core Tools](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=windows%2Ccsharp%2Cbash) or [Visual Studio Code](https://code.visualstudio.com/) or [Visual Studio 2019](https://visualstudio.microsoft.com/vs/) and an Azure SQL database to use. If you need help to create an Azure SQL database, take a look here: [Running the samples](https://github.com/yorek/azure-sql-db-samples#running-the-samples).
+To run this sample, you need to have [Azure Function Core Tools 3.x](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=windows%2Ccsharp%2Cbash) or [Visual Studio Code](https://code.visualstudio.com/) or [Visual Studio 2019](https://visualstudio.microsoft.com/vs/) and an Azure SQL database to use. If you need help to create an Azure SQL database, take a look here: [Running the samples](https://github.com/yorek/azure-sql-db-samples#running-the-samples). If you are using Visual Studio Code, make also sure to have installed [Azure Storage Emulator](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator) and started it.
+
+## Create Database and import Route static data
+
+TDB
 
 ## Settings
+
 Before running the sample locally or on Azure, make sure to create a `local.settings.json` file using the provided template. There are three settings that you must specify:
 
 - `RealtimeFeedUrl` should point to a valid [GTFS-Realtime](https://gtfs.org/reference/realtime/v2/#message-feedheader) url. The sample uses the one provided by [King County Metro](https://kingcounty.gov/depts/transportation/metro/travel-options/bus/app-center/developer-resources.aspx). 

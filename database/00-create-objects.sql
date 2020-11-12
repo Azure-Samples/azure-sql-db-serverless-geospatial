@@ -247,3 +247,13 @@ begin
 end
 go
 
+
+/*
+	Return the Routes (and thus the buses) to monitor
+}
+*/
+create or alter procedure [web].[GetMonitoredRoutes]
+as
+begin
+	select RouteId from dbo.[MonitoredRoutes]
+end

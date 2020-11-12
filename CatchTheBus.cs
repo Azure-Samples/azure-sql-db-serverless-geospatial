@@ -3,8 +3,6 @@ using System.Net.Http;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
-using Dapper;
-using Polly;
 using System.Threading.Tasks;
 
 namespace CatchTheBus

@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Dapper;
-using Polly;
 using System.Threading.Tasks;
 using System.Net.Http;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using Newtonsoft;
 using Newtonsoft.Json;
-using CatchTheBus;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
