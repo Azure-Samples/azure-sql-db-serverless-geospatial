@@ -8,7 +8,6 @@ products:
 - azure-sql-database
 - azure
 - dotnet
-- dotnet-core
 - azure-functions
 description: "Real-Time Serverless GeoSpatial Public Transportation GeoFencing Solution"
 urlFragment: "azure-sql-db-serverless-geospatial"
